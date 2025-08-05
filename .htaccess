@@ -1,0 +1,55 @@
+# Простая конфигурация для системы заказов
+
+# Устанавливаем index.html как главную страницу
+DirectoryIndex index.html
+
+# Безопасность - запрещаем доступ к конфигурационным файлам
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files "database.sql">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files ".htaccess">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Основные MIME типы
+<IfModule mod_mime.c>
+    AddType application/json .json
+    AddType text/html .html
+    AddType application/x-httpd-php .php
+</IfModule>
+
+# Базовые заголовки безопасности
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    
+    # CORS для AJAX запросов
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST"
+    Header always set Access-Control-Allow-Headers "Content-Type"
+</IfModule>
+
+# Увеличиваем лимиты для PHP
+<IfModule mod_php7.c>
+    php_value max_execution_time 300
+    php_value memory_limit 256M
+</IfModule>
+
+<IfModule mod_php8.c>
+    php_value max_execution_time 300
+    php_value memory_limit 256M
+</IfModule>
+
+# Обработка ошибок
+ErrorDocument 404 /index.html
+
+# Запрещаем листинг директорий
+Options -Indexes

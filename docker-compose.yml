@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # PostgreSQL база данных
+  postgres:
+    image: postgres:15-alpine
+    container_name: order_system_db
+    environment:
+      POSTGRES_DB: order_system
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database.sql:/docker-entrypoint-initdb.d/01-init.sql
+
+  # Redis для кэширования и блокировок
+  redis:
+    image: redis:7-alpine
+    container_name: order_system_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # PHP веб-сервер с Apache
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: order_system_web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - DB_HOST=postgres
+      - DB_NAME=order_system
+      - DB_USER=postgres
+      - DB_PASS=password
+      - REDIS_HOST=redis
+
+volumes:
+  postgres_data:
+  redis_data:
